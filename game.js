@@ -30,7 +30,7 @@ function nextSequence(){
             if(i<gamePattern.length){
                 animateSequence();
             }
-        },500);
+        },1000);
     }
 }
 
@@ -77,7 +77,7 @@ function animatePress(key){
     $("#"+key).addClass("pressed");
     setTimeout(function() {
         $("#"+key).removeClass("pressed");
-    }, 100);
+    }, 500);
 }
 function playSound(key){
     var audio = new Audio('sounds/'+key+'.mp3');
