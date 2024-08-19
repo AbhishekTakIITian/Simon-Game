@@ -1,94 +1,85 @@
-
-var buttonColours = ["red", "blue", "green", "yellow"];
-
-var gamePattern = [];
-var userClickedPattern = [];
-
-var started = false;
+var buttonColors = ["red","blue","green","yellow"];
+var gamePattern=[];
+var userClickPattern=[];
 var level = 0;
+var started = false;
 
-$(document).keypress(function() {
-  if (!started) {
-    $("#level-title").text("Level " + level);
-    nextSequence();
-    started = true;
-  }
-});
-
-$(".btn").click(function() {
-
-  var userChosenColour = $(this).attr("id");
-  userClickedPattern.push(userChosenColour);
-
-  playSound(userChosenColour);
-  animatePress(userChosenColour);
-
-  checkAnswer(userClickedPattern.length-1);
-});
-
-
-function checkAnswer(currentLevel) {
-
-    if (gamePattern[currentLevel] === userClickedPattern[currentLevel]) {
-
-      console.log("success");
-
-      if (userClickedPattern.length === gamePattern.length){
-        setTimeout(function () {
-          nextSequence();
-        }, 1000);
-      }
-
-    } else {
-
-      console.log("wrong");
-
-      playSound("wrong");
-
-      $("body").addClass("game-over");
-      setTimeout(function () {
-        $("body").removeClass("game-over");
-      }, 200);
-
-      $("#level-title").text("Game Over, Press Any Key to Restart");
-
-      //2. Call startOver() if the user gets the sequence wrong.
-      startOver();
+$(document).keypress(function(){
+    if(!started){
+        nextSequence();
+        started = true;
     }
+})
 
+function nextSequence(){
+    level++;
+
+    $("#level-title").text("Level "+level);
+    
+    var num = Math.floor(Math.random()*4);
+    var randomChosenColor = buttonColors[num];
+    
+    gamePattern.push(randomChosenColor);
+    var i = 0;
+    animateSequence();
+    function animateSequence(){
+        setTimeout(function() {    
+            $("#"+gamePattern[i]).animate({opacity:'0.25'}).animate({opacity:'1'});
+            playSound(gamePattern[i]);
+            i++;
+            if(i<gamePattern.length){
+                animateSequence();
+            }
+        },500);
+    }
 }
 
-function nextSequence() {
 
-  userClickedPattern = [];
-  level++;
-  $("#level-title").text("Level " + level);
 
-  var randomNumber = Math.floor(Math.random() * 4);
-  var randomChosenColour = buttonColours[randomNumber];
-  gamePattern.push(randomChosenColour);
+$(".btn").on("click",function(){
+    var clickedButton = $(this).attr("id");
+    userClickPattern.push(clickedButton);
 
-  $("#" + randomChosenColour).fadeIn(100).fadeOut(100).fadeIn(100);
-  playSound(randomChosenColour);
+    animatePress(clickedButton);
+    playSound(clickedButton);
+    checkAnswer(userClickPattern.length - 1);
+})
+
+function checkAnswer(index){
+    if(userClickPattern[index]===gamePattern[index]){
+        console.log("Success");
+        if((index+1) === gamePattern.length){
+            setTimeout(function(){
+                nextSequence();
+                userClickPattern.length = 0;
+            },1000);
+        }
+    }
+    else{
+        console.log("Wrong");
+        playSound("wrong");
+        $("body").addClass("game-over");
+        setTimeout(function(){
+            $("body").removeClass("game-over");
+        },200);
+        $("#level-title").text("Game Over, Press Any Key to Restart");
+        startOver();
+    }
 }
 
-function playSound(name) {
-  var audio = new Audio("sounds/" + name + ".mp3");
-  audio.play();
+function startOver(){
+     gamePattern.length=0;
+     userClickPattern.length=0;
+     level = 0;
+     started = false;
 }
-
-function animatePress(currentColor) {
-  $("#" + currentColor).addClass("pressed");
-  setTimeout(function () {
-    $("#" + currentColor).removeClass("pressed");
-  }, 100);
+function animatePress(key){
+    $("#"+key).addClass("pressed");
+    setTimeout(function() {
+        $("#"+key).removeClass("pressed");
+    }, 100);
 }
-
-//1. Create a new function called startOver().
-function startOver() {
-
-  //3. Inside this function, you'll need to reset the values of level, gamePattern and started variables.
-  level = 0;
-  gamePattern = [];
-  started = false;
+function playSound(key){
+    var audio = new Audio('sounds/'+key+'.mp3');
+    audio.play();
 }
